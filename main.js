@@ -248,9 +248,8 @@ loader.load(
   function (glb) {
 
     // glb.scene.rotation.y = THREE.MathUtils.degToRad(30);
-
     glb.scene.traverse((child) => {
-      console.log("Object name:", child.name); // <-- dòng này để in ra tên object
+      // console.log("Object name:", child.name); // <-- dòng này để in ra tên object
       if (intersectObjectsNames.includes(child.name)) {
         intersectObjects.push(child);
       }
@@ -286,6 +285,69 @@ loader.load(
   }
 );
 
+const speechDiv = document.getElementById("speech");
+const speechOffset = new THREE.Vector3(0, 2, 0); // vị trí phía trên đầu robot
+
+//Robot
+let robot;
+const raycasterRobot = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+let isJumping = false;
+let jumpUp = true;
+let jumpHeight = 5;
+let jumpSpeed = 1;
+let originalY = 0;
+
+const robotLoader = new GLTFLoader();
+
+robotLoader.load( './robot.glb', function ( glb ) {
+    robot = glb.scene;
+    //Cast shadow
+    glb.scene.traverse(( child ) => {
+        if (child.isMesh){
+            child.castShadow = true; 
+            child.receiveShadow = true;
+        }
+    glb.scene.scale.set(2, 2, 2);
+    glb.scene.position.set(-34, 0, -125);
+    glb.scene.rotation.y = -Math.PI / 2;
+    });
+    scene.add( glb.scene );
+
+}, undefined, function ( error ) {
+
+  console.error( error );
+
+} );
+
+//Bus
+const clock = new THREE.Clock();
+
+const busLoader = new GLTFLoader();
+
+let bus;
+
+busLoader.load( './bus.glb', function ( glb ) {
+    bus = glb.scene;
+    //Cast shadow
+    glb.scene.traverse(( child ) => {
+        if (child.isMesh){
+            child.castShadow = true; 
+            child.receiveShadow = true;
+        }
+    glb.scene.scale.set(0.01, 0.01, 0.01);
+    glb.scene.position.set(80, 0, -142);
+    glb.scene.rotation.y = Math.PI / 2;
+
+    });
+    scene.add( glb.scene );
+
+}, undefined, function ( error ) {
+
+  console.error( error );
+
+} );
 
 // Lighting and Enviornment Stuff
 // See: https://threejs.org/docs/?q=light#api/en/lights/DirectionalLight
@@ -325,23 +387,23 @@ const camera = new THREE.OrthographicCamera(
   1000
 );
 
-camera.position.x = -13;
-camera.position.y = 47;
-camera.position.z = -67;
+camera.position.x = -91;
+camera.position.y = 38;
+camera.position.z = -165;
 
 const cameraOffset = new THREE.Vector3(-13, 47, -67);
 
-
-
-camera.zoom = 1.0;
+camera.zoom = 2.0;
 camera.updateProjectionMatrix();
 
 /************************************************** */
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;    // cho phép inertia
 controls.dampingFactor = 0.05;
-controls.enableZoom    = true;    // tuỳ chỉnh nếu muốn
+controls.enableZoom    = false;    // tuỳ chỉnh nếu muốn
 controls.enablePan     = false;   // tắt pan nếu không cần
+controls.minPolarAngle = 0;      // Góc nghiêng tối thiểu (0 độ = nhìn từ trên xuống)
+controls.maxPolarAngle = Math.PI / 2.6;
 /************************************************* */
 
 
@@ -764,6 +826,42 @@ function handleContinuousMovement() {
   }
 }
 
+//Sound Effects
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+const sound = new THREE.Audio(listener);
+
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load('./jump.mp3', function(buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(false);
+    sound.setVolume(0.5);
+});
+
+function showSpeech(text) {
+    if (!robot) return;
+
+    const worldPos = new THREE.Vector3();
+    robot.getWorldPosition(worldPos);
+    worldPos.add(speechOffset); // đưa lên trên đầu
+
+    const screenPos = worldPos.clone().project(camera);
+
+    const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (1 - (screenPos.y * 0.5 + 0.5)) * window.innerHeight;
+
+    speechDiv.style.left = `${x}px`;
+    speechDiv.style.top = `${y}px`;
+    speechDiv.textContent = text;
+    speechDiv.style.display = "block";
+
+    // Ẩn sau 3 giây
+    setTimeout(() => {
+        speechDiv.style.display = "none";
+    }, 500);
+}
+
 Object.entries(mobileControls).forEach(([direction, element]) => {
   element.addEventListener("touchstart", (e) => {
     e.preventDefault();
@@ -800,6 +898,26 @@ window.addEventListener("blur", () => {
   });
 });
 
+canvas.addEventListener('click', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+    raycasterRobot.setFromCamera(mouse, camera);
+
+    if (robot) {
+        const intersects = raycasterRobot.intersectObject(robot, true);
+        if (intersects.length > 0 && !isJumping) {
+            showSpeech("Chào mừng đến với UIT!!");
+
+            isJumping = true;
+            jumpUp = true;
+
+            if (sound.isPlaying) sound.stop();
+            sound.play();
+        }
+    }
+});
+
 // Adding Event Listeners (tbh could make some of these just themselves rather than seperating them, oh well)
 modalExitButton.addEventListener("click", hideModal);
 modalbgOverlay.addEventListener("click", hideModal);
@@ -820,6 +938,31 @@ let firstFollow = true;
 function animate() {
   updatePlayer();
   handleContinuousMovement();
+
+  const delta = clock.getDelta();
+  if (bus) {
+    const speed = 10; // đơn vị/giây
+    bus.position.x -= speed * delta;
+
+    if (bus.position.x < -110) {
+        bus.position.x = 80;
+    }
+  }
+
+  if (robot && isJumping) {
+        if (jumpUp) {
+            robot.position.y += jumpSpeed;
+            if (robot.position.y >= originalY + jumpHeight) {
+                jumpUp = false; // bắt đầu rơi xuống
+            }
+        } else {
+            robot.position.y -= jumpSpeed;
+            if (robot.position.y <= originalY) {
+                robot.position.y = originalY;
+                isJumping = false;
+            }
+        }
+    }
 
   if (character.instance) {
     const charPos = character.instance.position;
