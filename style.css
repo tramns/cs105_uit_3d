@@ -279,6 +279,34 @@
   pointer-events: none;
 }
 
+#speech.speech-bubble {
+  position: absolute;
+  /* căn gốc để transform(-50%, -100%) dịch 
+     mid-bottom của div tới (left, top) đã set */
+  transform-origin: 50% 100%;
+  background: #ffffff;
+  color: #007bff;
+  padding: 8px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+#speech.speech-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;      /* đuôi nhô ra dưới đáy */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 8px 0;
+  border-style: solid;
+  border-color: #ffffff transparent;
+}
+
+
+
 /* Media Queries */
 
 @media (max-width: 1100px) {
