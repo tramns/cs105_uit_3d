@@ -118,10 +118,10 @@ const secondIconTwo = document.querySelector(".second-icon-two");
 
 // Modal stuff
 const modalContent = {
-  Project_1: {
-    title: "🍜Recipe Finder👩🏻‍🍳",
+  sign_UIT: {
+    title: "🌞About UIT👋",
     content:
-      "Let's get cooking! This project uses TheMealDB API for some recipes and populates my React card components. This shows my skills in working with consistent design systems using components. There is also pagination to switch pages.",
+      "Established in 2006, the University of Information Technology (UIT) is a leading institution for Information Technology in Vietnam. The university currently offers nine academic programs, supported by a high-quality faculty and a modern learning environment.",
     link: "https://www.uit.edu.vn/",
   },
   Project_2: {
@@ -182,7 +182,7 @@ const pointer = new THREE.Vector2();
 let intersectObject = "";
 const intersectObjects = [];
 const intersectObjectsNames = [
-  "Project_1",
+  "sign_UIT",
   "Project_2",
   "Project_3",
   "Picnic",
@@ -191,7 +191,7 @@ const intersectObjectsNames = [
   "Pikachu",
   "Bulbasaur",
   "Charmander",
-  "Snorlax",
+  "daudau",
   "Chest",
 ];
 
@@ -432,7 +432,7 @@ function jumpCharacter(meshID) {
   const mesh = scene.getObjectByName(meshID);
   const jumpHeight = 2;
   const jumpDuration = 0.5;
-  const isSnorlax = meshID === "Snorlax";
+  const isdaudau = meshID === "daudau";
 
   const currentScale = {
     x: mesh.scale.x,
@@ -443,17 +443,17 @@ function jumpCharacter(meshID) {
   const t1 = gsap.timeline();
 
   t1.to(mesh.scale, {
-    x: isSnorlax ? currentScale.x * 1.2 : 1.2,
-    y: isSnorlax ? currentScale.y * 0.8 : 0.8,
-    z: isSnorlax ? currentScale.z * 1.2 : 1.2,
+    x: isdaudau ? currentScale.x * 1.2 : 1.2,
+    y: isdaudau ? currentScale.y * 0.8 : 0.8,
+    z: isdaudau ? currentScale.z * 1.2 : 1.2,
     duration: jumpDuration * 0.2,
     ease: "power2.out",
   });
 
   t1.to(mesh.scale, {
-    x: isSnorlax ? currentScale.x * 0.8 : 0.8,
-    y: isSnorlax ? currentScale.y * 1.3 : 1.3,
-    z: isSnorlax ? currentScale.z * 0.8 : 0.8,
+    x: isdaudau ? currentScale.x * 0.8 : 0.8,
+    y: isdaudau ? currentScale.y * 1.3 : 1.3,
+    z: isdaudau ? currentScale.z * 0.8 : 0.8,
     duration: jumpDuration * 0.3,
     ease: "power2.out",
   });
@@ -469,9 +469,9 @@ function jumpCharacter(meshID) {
   );
 
   t1.to(mesh.scale, {
-    x: isSnorlax ? currentScale.x * 1.2 : 1,
-    y: isSnorlax ? currentScale.y * 1.2 : 1,
-    z: isSnorlax ? currentScale.z * 1.2 : 1,
+    x: isdaudau ? currentScale.x * 1.2 : 1,
+    y: isdaudau ? currentScale.y * 1.2 : 1,
+    z: isdaudau ? currentScale.z * 1.2 : 1,
     duration: jumpDuration * 0.3,
     ease: "power1.inOut",
   });
@@ -489,7 +489,7 @@ function jumpCharacter(meshID) {
     ">"
   );
 
-  if (!isSnorlax) {
+  if (!isdaudau) {
     t1.to(mesh.scale, {
       x: 1,
       y: 1,
@@ -506,47 +506,41 @@ function onClick() {
 }
 
 function handleInteraction() {
-  if (!modal.classList.contains("hidden")) {
+  if (!modal.classList.contains("hidden")) return;
+
+  // 1) Raycast đệ quy để có thể chạm tới mesh con sâu bên trong
+  raycaster.setFromCamera(pointer, camera);
+  const intersects = raycaster.intersectObjects(intersectObjects, true);
+  if (intersects.length === 0) {
+    intersectObject = "";
     return;
   }
 
-  raycaster.setFromCamera(pointer, camera);
-  const intersects = raycaster.intersectObjects(intersectObjects);
-
-  if (intersects.length > 0) {
-    intersectObject = intersects[0].object.parent.name;
-  } else {
-    intersectObject = "";
+  // 2) Leo lên ancestor cho đến khi node.name khớp với list của chúng ta
+  let node = intersects[0].object;
+  while (node && !intersectObjectsNames.includes(node.name)) {
+    node = node.parent;
   }
+  if (!node) return;  // không tìm được node hợp lệ
 
-  if (intersectObject !== "") {
-    if (
-      [
-        "Bulbasaur",
-        "Chicken",
-        "Pikachu",
-        "Charmander",
-        "Squirtle",
-        "Snorlax",
-      ].includes(intersectObject)
-    ) {
-      if (isCharacterReady) {
-        if (!isMuted) {
-          playSound("pokemonSFX");
-        }
-        jumpCharacter(intersectObject);
-        isCharacterReady = false;
-      }
-    } else {
-      if (intersectObject) {
-        showModal(intersectObject);
-        if (!isMuted) {
-          playSound("projectsSFX");
-        }
-      }
+  intersectObject = node.name;
+
+  // 3) Xử lý như cũ, nhưng giờ chắc chắn được tên đúng
+  if (
+    ["Bulbasaur", "Chicken", "Pikachu", "Charmander", "Squirtle", "daudau"]
+      .includes(intersectObject)
+  ) {
+    if (isCharacterReady) {
+      if (!isMuted) playSound("pokemonSFX");
+      jumpCharacter(intersectObject);
+      isCharacterReady = false;
     }
+  } else {
+    showModal(intersectObject);
+    if (!isMuted) playSound("projectsSFX");
   }
 }
+
 
 function onMouseMove(event) {
   pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -862,6 +856,35 @@ function showSpeech(text) {
     }, 500);
 }
 
+//---------------------------------------------------------------------
+speechDiv.classList.add("speech-bubble");
+// Cho label DauDau luôn hiển thị
+function updateDauDauLabel() {
+  const daudau = scene.getObjectByName("daudau");
+  if (!daudau) return;
+
+  // 1) Lấy vị trí thế giới và offset cao hơn
+  const worldPos = new THREE.Vector3();
+  daudau.getWorldPosition(worldPos);
+  worldPos.y += 14  ;  // tăng lên 3 để bubble hơi cách đầu
+
+  // 2) Chiếu ra toạ độ màn hình
+  const screenPos = worldPos.project(camera);
+  const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (1 - (screenPos.y * 0.5 + 0.5)) * window.innerHeight;
+
+  // 3) Cập nhật DOM
+  speechDiv.style.left = `${x}px`;
+  speechDiv.style.top = `${y}px`;
+  // shift bubble sao cho điểm (x,y) thành đáy giữa của nó
+  speechDiv.style.transform = `translate(-80%, -100%)`;
+
+  speechDiv.textContent = "Xin chào, tôi là Đậu Đậu!";
+  speechDiv.style.display = "block";
+}
+
+//---------------------------------------------------------------------
+
 Object.entries(mobileControls).forEach(([direction, element]) => {
   element.addEventListener("touchstart", (e) => {
     e.preventDefault();
@@ -989,7 +1012,7 @@ function animate() {
 
   // c) Cập nhật controls để xử lý input chuột
   controls.update();
-
+  updateDauDauLabel();
   // d) Render
   renderer.render(scene, camera); 
 
