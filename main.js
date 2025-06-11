@@ -115,6 +115,60 @@ const secondIcon = document.querySelector(".second-icon");
 const audioToggleButton = document.querySelector(".audio-toggle-button");
 const firstIconTwo = document.querySelector(".first-icon-two");
 const secondIconTwo = document.querySelector(".second-icon-two");
+// 1. Tải texture
+const textureLoader = new THREE.TextureLoader();
+const boardWidth = 8;  // Thêm khai báo kích thước
+const boardHeight = 8; // Thêm khai báo kích thước
+
+textureLoader.load('./logo.jpg', (texture) => {
+  // 2. Cấu hình sau khi tải
+  texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  
+  // 3. Tạo vật liệu
+  const material = new THREE.MeshStandardMaterial({
+    map: texture,
+    side: THREE.DoubleSide
+  });
+
+  // 4. Tạo mesh board
+  const board = new THREE.Mesh(
+    new THREE.PlaneGeometry(boardWidth, boardHeight),
+    material
+  );
+  board.position.set(-17, 4.5, -125);
+  board.rotation.y = Math.PI;
+
+  // 5. Tạo viền (border)
+  const borderThickness = 0.2;
+  const borderGeometry = new THREE.BoxGeometry(
+    boardWidth + borderThickness * 2, 
+    boardHeight + borderThickness * 2, 
+    borderThickness
+  );
+  const borderMaterial = new THREE.MeshBasicMaterial({ 
+    color: 0x8B4513 // Màu nâu gỗ
+  });
+  const border = new THREE.Mesh(borderGeometry, borderMaterial);
+  
+  // Đặt border cùng vị trí với board nhưng lùi về sau một chút
+  border.position.copy(board.position);
+  border.rotation.copy(board.rotation);
+  border.position.z += borderThickness * 0.6;
+
+  // 6. Nhóm board và border lại
+  const boardGroup = new THREE.Group();
+  boardGroup.add(board);
+  boardGroup.add(border);
+
+  scene.add(boardGroup);
+}, undefined, (error) => {
+  console.error("Lỗi tải texture:", error);
+});
+
 
 // Modal stuff
 const modalContent = {
@@ -284,6 +338,7 @@ loader.load(
     console.error(error);
   }
 );
+
 
 const speechDiv = document.getElementById("speech");
 const speechOffset = new THREE.Vector3(0, 2, 0); // vị trí phía trên đầu robot
