@@ -178,27 +178,27 @@ const modalContent = {
       "Established in 2006, the University of Information Technology (UIT) is a leading institution for Information Technology in Vietnam. The university currently offers nine academic programs, supported by a high-quality faculty and a modern learning environment.",
     link: "https://www.uit.edu.vn/",
   },
-  Project_2: {
-    title: "📋ToDo List✏️",
+  sign_A: {
+    title: "📋Toa A✏️",
     content:
-      "Keeping up with everything is really exhausting so I wanted to create my own ToDo list app. But I wanted my ToDo list to look like an actual ToDo list so I used Tailwind CSS for consistency and also did state management with React hooks like useState.",
+      "Phòng Đào Tạo, Thư viện, Phòng Công tác Sinh Viên",
     link: "https://example.com/",
   },
-  Project_3: {
-    title: "🌞Weather App😎",
+  sign_B: {
+    title: "🌞Toa B😎",
     content:
-      "Rise and shine as they say (but sometimes it's not all that shiny outside). Using a location-based API the user can automatically detect their location and my application will show them the weather near them. I also put some of my design skills to use using Figma.",
+      "B.102 B.104 B.106....",
     link: "https://example.com/",
   },
-  Chest: {
-    title: "💁‍♀️ About Me",
+  sign_C: {
+    title: "💁‍♀️ Toa C",
     content:
-      "Hi you found my chest👋, I'm Bella Xu and I am an aspiring creative developer and designer. I just started web development this year! In the signs, you will see some of my most recent projects that I'm proud of. I hope to add a lot more in the future. In my free time, I like to draw, watch TV shows (especially Pokémon), do clay sculpting and needle felting. Reach out if you wanna chat. Bella is OUT!!! 🏃‍♀️",
+      "C.103, C.105...",
   },
-  Picnic: {
-    title: "🍷 Uggh yesss 🧺",
+  sign_E: {
+    title: "🍷 Toa E 🧺",
     content:
-      " Picnics are my thanggg don't @ me. Lying down with some good grape juice inna wine glass and a nice book at a park is my total vibe. If this isn't max aura points 💯 idk what is.",
+      " Văn phòng khoa Khoa học Máy tính, Công nghệ Phần mềm, Kỹ thuật Máy tính....",
   },
 };
 
@@ -237,16 +237,16 @@ let intersectObject = "";
 const intersectObjects = [];
 const intersectObjectsNames = [
   "sign_UIT",
-  "Project_2",
-  "Project_3",
-  "Picnic",
+  "sign_A",
+  "sign_B",
+  "sign_E",
   "Squirtle",
   "Chicken",
   "Pikachu",
   "Bulbasaur",
   "Charmander",
   "daudau",
-  "Chest",
+  "sign_C",
 ];
 
 // Loading screen and loading manager
